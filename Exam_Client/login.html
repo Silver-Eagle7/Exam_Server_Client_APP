@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam - Login</title>
+</head>
+
+<body style="text-align: center; padding-top: 20%;">
+    <script>
+        const url = "http://127.0.0.1:5002/exam"
+        function handleClick() {
+            // e.preventDefault();
+            let name = document.getElementsByName("name")[0].value;
+            let university = document.getElementsByName("university")[0].value;
+            const dataToSend = JSON.stringify({"name": name, "university": university});
+            console.log(dataToSend);
+            fetch(url+"/create_student", {
+                method: "post",
+                headers: { "Content-Type": "application/json" },
+                body: dataToSend
+            })
+            .then(resp => {
+                if (resp.status === 201) {
+                    window.location.href = window.location.href.replace("login.html", `exam.html?name=${name}`);
+                } else {
+                    console.log("Status: " + resp.status)
+                    return Promise.reject("server")
+                }
+            })
+            .catch(e => {
+                console.log(e);
+                document.getElementsByTagName("body")[0].innerHTML = e;
+            })
+        }
+    </script>
+    <form method="post" action="http://127.0.0.1:5002/exam/create_student" onsubmit="return handleClick()">
+        <div><input type="text" name="name" placeholder="Student Name"></div>
+        <div><input type="text" name="university" placeholder="University"></div>
+        <div><input type="button" value="Login" onclick="return handleClick()"></div>
+    </form>
+</body>
+
+
+</html>

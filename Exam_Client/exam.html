@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam</title>
+    <script>
+        
+    </script>
+</head>
+
+<body>
+    <script>
+
+        const url = "http://127.0.0.1:5002"
+        const urlParams = new URLSearchParams(window.location.search);
+        var dataReceived = "";
+        function handleClick() {
+            // e.preventDefault();
+            dataToSend = {}
+            for(qnid in dataReceived) {
+                let ans = document.querySelector(`input[name="${qnid}"]:checked`).value;
+                dataToSend[dataReceived[qnid]['Q']] = ans;
+            }
+            fetch(url+`/exam/validate/${urlParams.get('name')}`, {
+                method: "post",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataToSend)
+            })
+            .then(resp => {
+                if (resp.status === 201) {
+                    return resp.json();
+                } else {
+                    console.log("Status: " + resp.status)
+                    return Promise.reject("server")
+                }
+            })
+            .then(dataJson => {
+                marks = dataJson['score'];
+                alert(`You have scored ${marks} marks!`);
+                document.getElementsByTagName("body")[0].innerHTML = "<h1>Test has ended!</h1>";
+            })
+            .catch(e => {
+                console.log(e);
+                document.getElementsByTagName("body")[0].innerHTML = e;
+            })
+        }
+        fetch(url+"/exam/get_questions", {
+                method: "get",
+                headers: { "Content-Type": "application/json" },
+            })
+            .then(resp => {
+                if (resp.status === 200) {
+                    return resp.json()
+                } else {
+                    console.log("Status: " + resp.status)
+                    return Promise.reject("server")
+                }
+            })
+            .then(dataJson => {
+                dataReceived = JSON.parse(JSON.stringify(dataJson));
+                console.log(dataReceived);
+                console.log(dataReceived);
+                console.log(window.dataReceived);
+                var form = document.createElement("form");
+                form.setAttribute("method", "post");
+                form.setAttribute("action", url+`/exam/validate/${urlParams.get('name')}`);
+                form.setAttribute("onsubmit", "return handleClick()");
+                for(let qnid=1;qnid<=5;qnid++) {
+                    let qadiv = document.createElement("div");
+                    let qp = document.createElement("p");
+                    qadiv.appendChild(qp);
+                    let qn = dataReceived[qnid]['Q'];
+                    console.log(qn)
+                    console.log(qnid)
+                    qp.innerHTML = qn;
+                    
+                    let odiv = document.createElement("div");
+                    for(let i=0;i<4;i++) {
+                        let op1 = document.createElement("input");
+                        op1.setAttribute("type", "radio");
+                        op1.setAttribute("name", qnid);
+                        op1.setAttribute("id", qnid+i);
+                        op1.setAttribute("value", dataReceived[qnid]['O'][i]);
+                        let lab1 = document.createElement("label");
+                        lab1.setAttribute("for", qnid+i);
+                        lab1.innerHTML = dataReceived[qnid]['O'][i];
+                        odiv.appendChild(op1);
+                        odiv.appendChild(lab1);
+                    }
+                    
+
+                    
+                    qadiv.appendChild(odiv);
+                    
+                    form.appendChild(qadiv);
+                }
+                let submit = document.createElement("input");
+                submit.setAttribute("type", "button");
+                submit.setAttribute("onclick", "return handleClick()");
+                submit.setAttribute("value", "Submit");
+                form.appendChild(submit)
+
+                document.getElementsByTagName("body")[0].appendChild(form);
+        })
+        .catch(e => {
+            console.log(e);
+            document.getElementsByTagName("body")[0].innerHTML = e;
+        })
+    </script>
+</body>
+
+
+</html>
